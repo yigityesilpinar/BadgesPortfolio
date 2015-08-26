@@ -13,3 +13,9 @@
 #langsAutocompSkills {
     max-width: 200px;
 }
+@media screen and (max-width: 470px) {
+    #langsAutocompSkills {
+          display: block;
+    }
+}
+ 

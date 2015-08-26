@@ -3,9 +3,9 @@ jQuery(document).ready(function ($) {
     var http = location.protocol;
     var slashes = http.concat("//");
     var host = slashes.concat(window.location.hostname);
-    var plugin_url = host.concat('/wp-content/plugins/badge_portfolio/');
+    var plugin_url = host.concat('/wp-content/plugins/BadgePortfolio/');
     $('#langsAutocompSkills').autocomplete({
-        source: plugin_url + 'includes/partials/badge_portfolio-langs.php',
+        source: plugin_url + 'includes/partials/badge-portfolio-langs.php',
         minLength: 2,
         select: function (event, ui) {
             var code = ui.item.id;
@@ -13,7 +13,7 @@ jQuery(document).ready(function ($) {
             var skill = 0; // 0  for Writing
             $.ajax({
                 type: 'POST',
-                url: plugin_url + 'includes/partials/badge_portfolio-all.php',
+                url: plugin_url + 'includes/partials/badge-portfolio-all.php',
                 data: {
                     'lang': lang,
                     'learn_lang': code,
@@ -128,7 +128,7 @@ jQuery(document).ready(function ($) {
         }
         $.ajax({
             type: 'POST',
-            url: plugin_url + 'includes/partials/badge_portfolio-all.php',
+            url: plugin_url + 'includes/partials/badge-portfolio-all.php',
             data: {
                 'lang': lang,
                 'learn_lang': learn_lang,
@@ -236,7 +236,7 @@ jQuery(document).ready(function ($) {
         }
         $.ajax({
             type: 'POST',
-            url: plugin_url + 'includes/partials/badge_portfolio-all.php',
+            url: plugin_url + 'includes/partials/badge-portfolio-all.php',
             data: {
                 'lang': lang,
                 'learn_lang': learn_lang,

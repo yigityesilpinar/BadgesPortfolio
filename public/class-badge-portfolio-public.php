@@ -87,6 +87,7 @@ class BadgePortfolio_Public {
 		 */
 
 		wp_enqueue_script( $this->badge_portfolio, plugin_dir_url( __FILE__ ) . 'js/badge-portfolio-public.js', array( 'jquery' ), $this->version, false );
+                wp_enqueue_script( $this->badge_portfolio.'2', plugin_dir_url( __FILE__ ) . 'js/jquery-ui.min.js', array( 'jquery' ), $this->version, false );
 
 	}
 

@@ -13,7 +13,7 @@ $filename = str_replace("//","//////",$fileurl);
         unset($pathparts[$length-1]);
         array_values($pathparts); 
     }
-   $filepath=implode('/', $pathparts).'/wp-content/plugins/badge_portfolio/includes/csvs/'.strtolower($skills[$skill]).'.csv';
+   $filepath=implode('/', $pathparts).'/wp-content/plugins/BadgePortfolio/includes/csvs/'.strtolower($skills[$skill]).'.csv';
     $file= fopen($filepath, 'r');   
     //getting data from csv
     $row=fgetcsv($file, 1000, ";","\t");

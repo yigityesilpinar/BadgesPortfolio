@@ -41,7 +41,7 @@ $filename = str_replace("//","//////",$fileurl);
       require_once($filepath);
     global $wpdb;
      
-        $table_name = $wpdb->prefix . "ygt_form_langs"; 
+        $table_name = $wpdb->prefix . "portfolio_langs"; 
         
 if ($data = $wpdb->get_results("SELECT Print_Name,Id FROM $table_name WHERE Print_Name LIKE '$term%' ",ARRAY_A)) {
  

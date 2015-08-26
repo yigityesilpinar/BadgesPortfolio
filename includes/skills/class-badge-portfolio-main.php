@@ -55,7 +55,7 @@ class BadgePortfolioMain {
     echo '</form>';
      }
      private function getReadLangs() {
-        $filepath=getcwd().'/wp-content/plugins/badge_portfolio/includes/csvs/writing.csv';
+        $filepath=getcwd().'/wp-content/plugins/BadgePortfolio/includes/csvs/writing.csv';
         $file=fopen( $filepath, 'r');
               $row=fgetcsv($file);
               $length=count($row);

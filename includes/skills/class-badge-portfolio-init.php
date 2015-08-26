@@ -25,5 +25,5 @@ class BadgePortfolioInit {
     }
 	}
  }
- add_shortcode( 'skills', array( 'BadgePortfolioInit', 'skills_func' ) );
+ add_shortcode( 'portfolio', array( 'BadgePortfolioInit', 'skills_func' ) );
  ?>

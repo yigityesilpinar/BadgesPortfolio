@@ -36,7 +36,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 function activate_badge_portfolio() {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-badge-portfolio-activator.php';
-	BadgePortfolio_Activator::activate();
 }
 
 /**

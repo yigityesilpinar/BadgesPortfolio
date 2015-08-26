@@ -1,14 +1,22 @@
 <?php
+
+/**
+ * Provide a public-facing view for the plugin
+ *
+ * This file is used to markup the public-facing aspects of the plugin.
+ *
+ * @link       http://on-lingua.com
+ * @since      1.0.0
+ * @package    Badge_Portfolio
+ * @subpackage Badge_Portfolio/includes/partials
+ * @author     Yigit Yesilpinar <yigityesilpinar@gmail.com>
+ */
+?>
+
+<?php
 // contains utility functions mb_stripos_all() and apply_highlight()
 
-// prevent direct access
-$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) AND
-strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-if(!$isAjax) {
-  $user_error = 'Access denied - not an AJAX request...';
-  trigger_error($user_error, E_USER_ERROR);
-}
- 
+
 // get what user typed in autocomplete input
 $term = trim($_GET['term']);
  
@@ -19,17 +27,18 @@ $a_json_row = array();
 // replace multiple spaces with one
 $term = preg_replace('/\s+/', ' ', $term);
  
-// SECURITY HOLE ***************************************************************
-// allow space, any unicode letter and digit, underscore and dash
-if(preg_match("/[^\040\pL\pN_-]/u", $term)) {
-  print $json_invalid;
-  exit;
-}
-// *****************************************************************************
- 
-
- 
-require_once('C:/xampp/htdocs/wordpress/wp-load.php');
+	   $fileurl=str_replace("\\","/", __FILE__);
+$filename = str_replace("//","//////",$fileurl);
+     $pathparts=explode('/', $filename);
+    
+    for ($index = 0; $index < 6; $index++) {
+       $length=count($pathparts);
+        unset($pathparts[$length-1]);
+        array_values($pathparts);
+        
+    }
+   $filepath=implode('/', $pathparts).'/wp-load.php';
+      require_once($filepath);
     global $wpdb;
      
         $table_name = $wpdb->prefix . "ygt_form_langs"; 

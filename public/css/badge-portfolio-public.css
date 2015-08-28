@@ -19,6 +19,14 @@
     }
 }
 
+#badge_portfolio_form span.save_error {
+    background-color: #FFBABA;
+    display: block;
+    color: #D8000C;
+}
+
+
 #skills_questions_div td.A1{
     /*EXAMPLE CSS */
 }
+

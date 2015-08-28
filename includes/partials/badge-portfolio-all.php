@@ -1,4 +1,16 @@
 <?php
+/**
+ *
+ * AJAX form display
+ *
+ * @link       http://on-lingua.com
+ * @since      1.0.0
+ * @package    Badge_Portfolio
+ * @subpackage Badge_Portfolio/includes/partials
+ * @author     Yigit Yesilpinar <yigityesilpinar@gmail.com>
+ */
+?>
+<?php
 class BadgePortfolioAll {
   function get_cat_questions($skill,$lang) {
        $skills = array("Writing","Interaction","Reading","Listening","Speaking"); //

@@ -1,5 +1,7 @@
 jQuery(document).ready(function ($) {
     'use strict';
+    var numOfQuestions = [];
+    var levels = [];
     var http = location.protocol;
     var slashes = http.concat("//");
     var host = slashes.concat(window.location.hostname);
@@ -47,50 +49,58 @@ jQuery(document).ready(function ($) {
         var count = 0;
         result += '<table style="width:100%;">';
         result += ' <tr><th width="70%">Questions</th><th width="30%">YES MAYBE NO</th></tr>';
+        numOfQuestions = [];
+        levels = [];
+        var numCount = 0;
         for (var key in data) {
             if (data.hasOwnProperty(key)) {
 
                 var level = data[key].level;
                 var questions = data[key].questions;
-
+                numCount = 0;
+                var sth_checked = false;
                 for (var key2 in questions) {
                     if (questions.hasOwnProperty(key2)) {
 
                         var question = questions[key2];
                         result += '<tr><td class="' + level + '">';
                         result += question;
-                        result += '</td><td class="' + level + '">';
+                        result += '</td><td>';
+                        sth_checked = false;
                         checked = '';
-                        count = 0;
-                        if (ans && ans[count] === 'y')
+                        if (ans && ans[count] === 'y') {
+                            sth_checked = true;
                             checked = "checked='checked'";
-                        result += "<input type='radio' name='skills_radio_" + level + '_' + count + "' value='y'" + checked + "  />";
-                        count++;
+                        }       
+                        result += "<input type='radio' name='skills_radio[" + count + "]' value='y'" + checked + "  />";
                         checked = '';
-                        if (ans && ans[count] === 'm')
+                        if (ans && ans[count] === 'm') {
+                            sth_checked = true;
                             checked = "checked='checked'";
-                        result += "<input type='radio' name='skills_radio_" + level + '_' + count + "' value='m'" + checked + "  />";
-                        count++;
+                        }
+                        result += "<input type='radio' name='skills_radio[" + count + "]' value='m'" + checked + "  />";
                         checked = '';
-                        if (ans && ans[count] === 'n')
+                        if ((ans && ans[count] === 'n') || !sth_checked)
                             checked = "checked='checked'";
-                        result += "<input type='radio' name='skills_radio_" + level + '_' + count + "' value='n'" + checked + "  />";
+                        result += "<input type='radio' name='skills_radio[" + count + "]' value='n'" + checked + "  />";
 
                         result += '</td></tr>';
                         count++;
+                        numCount++;
                     }
-                }
 
+                }
+                numOfQuestions.push(numCount);
+                levels.push(level);
             }
         }
-        result += '</table>' + '<p><input type="submit" name="skills_form_save" value="Save"/></p>';
+
+        result += '</table>' + '<p id="portfolio_save_p"><input type="submit" name="skills_form_save" value="Save"/><span></span></p>';
         $("#skills_div").html(skills_div);
         $("#skills_questions_div").html(result);
 
 
     }
-
-
 
     $('#langsAutocompSkills').autocomplete({
         source: plugin_url + 'includes/partials/badge-portfolio-langs.php',
@@ -175,6 +185,54 @@ jQuery(document).ready(function ($) {
             dataType: 'json',
             success: function (data) {
                 displayForm(data);
+            }
+        });
+    });
+    $('#badge_portfolio_form').on('submit', function (e) {
+
+        e.preventDefault();
+        $("#portfolio_save_p").find('span').attr('class', '');
+        $("#portfolio_save_p").find('span').html('');
+        var i = 0;
+        var answers = [];  // empty array
+        var question_count = 0;
+        $("#badge_portfolio_form input[type=radio]").each(function () {
+            question_count++;
+        });
+        question_count = question_count / 3;
+        $("#badge_portfolio_form input[type=radio]:checked").each(function () {
+            answers.push($(this).val());
+        });
+        if (answers.length != question_count) {
+            var save_error = 'Please fill all the options before saving.';
+            $("#portfolio_save_p").find('span').attr('class', 'save_error');
+            $("#portfolio_save_p").find('span').html(save_error);
+            return;
+        }
+        var skill = parseInt($('#skills_div').find('a.selected').attr('href'));
+        var learn_lang = $("#langsAutocompSkills").val();
+        var lang = $("#skills_read_lang_select").val();
+        var newTxt = learn_lang.split('(');
+        for (var i = 1; i < newTxt.length; i++) {
+
+            if (newTxt[i].split(')')[0].length == 3) {
+                learn_lang = newTxt[i].split(')')[0];
+            };
+        }
+        $.ajax({
+            type: 'POST',
+            url: plugin_url + 'includes/partials/badge-portfolio-save.php',
+            data: {
+                'lang': lang,
+                'learn_lang': learn_lang,
+                'skill': skill,
+                'answers': answers,
+                'num': numOfQuestions,
+                'levels': levels
+            },
+            success: function (data) {
+                console.log(data);
+                //displayForm(data);
             }
         });
     });

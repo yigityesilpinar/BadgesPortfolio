@@ -12,10 +12,10 @@
 ?>
 <?php
 class BadgePortfolioSave{
-function send_skill_badge($lang,$level,$post_id,$skill) {
+function send_skill_badge($lang,$level,$badge_id,$skill) {
       
       if(empty($level) || $level=='--'){
-          return;
+          return false;
       }
         	//adding a salt to our hashed email
     $fileurl=str_replace("\\","/", __FILE__);
@@ -30,7 +30,10 @@ function send_skill_badge($lang,$level,$post_id,$skill) {
     }
       $filepath=implode('/', $pathparts).'/wp-load.php';
       require_once($filepath);   
+         global $user_ID;
         global $current_user;
+     
+        
 	get_currentuserinfo();
     $salt=uniqid(mt_rand(), true);
     $email_stud=$current_user->user_email;
@@ -47,9 +50,7 @@ function send_skill_badge($lang,$level,$post_id,$skill) {
 	$email_issuer='info@badges4languages.org';
 	$url_issuer='http://about.badges4languages.org/';
 	
-       
-        $badge_id=$post_id;
-        $badge_name=get_the_title($post_id);   
+        $badge_name=get_the_title($badge_id);   
         $desc=get_post($badge_id);
         $badge_desc=$desc->post_content;
         $badge_image=wp_get_attachment_image_src(get_post_thumbnail_id($badge_id))[0];
@@ -100,7 +101,7 @@ function send_skill_badge($lang,$level,$post_id,$skill) {
 				$url = str_rot13(base64_encode( site_url().'/wp-content/plugins/BadgePortfolio/'.'json/'.$file_json.'.json'));
 
 				//the actual message, which is displayed in an email
-                             
+         
 				$message= ' 
 					<html>
 					<head>
@@ -134,7 +135,7 @@ function send_skill_badge($lang,$level,$post_id,$skill) {
 				$headers .= "Reply-To: info@badges4languages.org"."\n";
 
 				mail($mail, $subject, $message, $headers); //the call of the mail function with parameters
-                                return true;
+                                return array(true,$user_ID);
 		}//end of if fwrite
 	}//end of if handle	
         return false;
@@ -170,10 +171,6 @@ function send_skill_badge($lang,$level,$post_id,$skill) {
                 } 
                     
                 }     
-                
-                  
-//array($answers,$skill),JSON_FORCE_OBJECT
-//$sent=self::send_skill_badge($grade,$skill,$learn_lang);
 	   $fileurl=str_replace("\\","/", __FILE__);
 $filename = str_replace("//","//////",$fileurl);
      $pathparts=explode('/', $filename);
@@ -195,9 +192,8 @@ $filename = str_replace("//","//////",$fileurl);
     $table_name = $wpdb->prefix . "term_relationships"; 
     $posts = $wpdb->get_results( "SELECT object_id FROM $table_name WHERE term_taxonomy_id='$skill_id'" ,ARRAY_N);
     $posts2 = $wpdb->get_results( "SELECT object_id FROM $table_name WHERE term_taxonomy_id='$level_id'",ARRAY_N);
-    $wpdb->prefix . "portfolio_langs";
-    $lang_print= $wpdb->get_var("SELECT Print_Name FROM $table_name WHERE Id='$learn_lang' ");
-
+    $table_name=$wpdb->prefix . "portfolio_langs";
+    $lang_print= $wpdb->get_var("SELECT Print_Name FROM $table_name WHERE Id='$learn_lang'");
     $badge_id=0;
         foreach ($posts as $p1){
             
@@ -224,9 +220,227 @@ $filename = str_replace("//","//////",$fileurl);
         }
         }
    }
-    $is_sent=self::send_skill_badge($lang_print,$grade,$badge_id,$skills[$skill]);
-    return json_encode($is_sent);
+   if ($badge_id==0) {
+       return json_encode('Badge could not be found!');
+   }
+    $result=self::send_skill_badge($lang_print,$grade,$badge_id,$skills[$skill]);
+    $is_sent=$result[0];
+    $portfolio_user_id = $result[1] ? $result[1] : 0;
+    $answer_string='';
+    $len=count($answers);
+    if($len>0){
+    for ( $i=0; $i<$len-1; $i++) {
+        $answer_string.=$answers[$i].',';
+    }
+    }
+    $answer_string.=$answers[$len-1];
+    //if the badge is sent, then save to the database
+    if($is_sent && $portfolio_user_id !=0){
+        
+        
+        global $wpdb;
+        $table_name = $wpdb->base_prefix . "badge_portfolio"; 
+        $previous=$wpdb->get_var("SELECT badge_id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='$skills[$skill]' AND lang='$learn_lang' AND level='$grade'");
+        if(is_null($previous)){     
+        $w=$wpdb->insert( 
+	$table_name, 
+	array( 
+		'user_id' => $portfolio_user_id, 
+		'badge_id' => $badge_id,
+                'lang' => $learn_lang,
+                'level' => $grade,
+                'skill' => $skills[$skill],
+                'answers' => $answer_string,
+                'read_lang' => $lang
+	), 
+	array( 
+		'%d', 
+		'%d',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+	));
+               
+          if($w){
+              $level_index=array_search($grade,$levels);
+              $level_index+=1;
+             $table_name = $wpdb->base_prefix . "badge_portfolio_user";
+             $old_lang=$wpdb->get_var("SELECT id FROM $table_name WHERE user_id='$portfolio_user_id' AND lang='$learn_lang'");
+             if(is_null($old_lang)){ 
+                 $skills_db='00000';
+                 $skills_arr=str_split($skills_db);
+                 $skills_arr[$skill]=$level_index;
+                 $skills_db=implode('',$skills_arr);
+                    
+                 $w2=$wpdb->insert( 
+	$table_name, 
+	array( 
+		'user_id' => $portfolio_user_id, 
+                'lang' => $learn_lang,
+                'skills' => $skills_db
+	), 
+	array( 
+                '%d',
+                '%s',
+                '%s'
+	));
+                 
+             }
+             else{
+              $skills_db=$wpdb->get_var("SELECT skills FROM $table_name WHERE user_id='$portfolio_user_id' AND lang='$learn_lang'");  
+              $skills_arr=str_split($skills_db);
+              $skills_arr[$skill]=$level_index;
+              $skills_db=implode('',$skills_arr);
+              $w2=$wpdb->replace( 
+	$table_name, 
+	array(  'id' => $old_lang,
+		'user_id' => $portfolio_user_id, 
+                'lang' => $learn_lang,
+                'skills' => $skills_db
+	), 
+	array( 
+                '%d',
+                '%d',
+                '%s',
+                '%s'
+	));
+              
+             }
+                     $skills_arr=str_split($skills_db);
+                     foreach ($skills_arr as $value) {
+                         $value+=0;
+                         if($value==0){
+                         return json_encode('Badge SENT!',$skills_db);    
+                             
+                         }
+                        
+                     }
+                     $skills_int=$skills_db+0;
+                     $temps=array(66666,55555,44444,33333,22222,11111);
+                     $levels_count=count($levels);
+                     foreach($temps as $key => $temp){ 
+                         
+                         
+                         // BIG BADGE SENDING PART******
+                         if($skills_int >= $temp){
+                             
+                               global $wpdb;
+    $table_name = $wpdb->prefix . "terms"; 
+    
+     $skill_id = $wpdb->get_var( "SELECT term_id FROM $table_name WHERE slug='allskills'" );
+                                 $grade=$levels[$levels_count-(1+$key)];
+                                  $level_slug=strtolower($grade);
+     $level_id = $wpdb->get_var( "SELECT term_id FROM $table_name WHERE slug='$level_slug'" );
+
+                             $table_name = $wpdb->prefix . "term_relationships"; 
+    $posts = $wpdb->get_results( "SELECT object_id FROM $table_name WHERE term_taxonomy_id='$skill_id'" ,ARRAY_N);
+    $posts2 = $wpdb->get_results( "SELECT object_id FROM $table_name WHERE term_taxonomy_id='$level_id'",ARRAY_N);
+    $badge_id=0;
+        foreach ($posts as $p1){
+            
+            $p1[0]+=0;
+            foreach ($posts2 as $p2){
+            
+            $p2[0]+=0;
+            if($p1==$p2){
+                $badge_id=$p1[0];
+            }
+        }
+        }
+   if($badge_id==0){
+       
+            foreach ($posts2 as $p1){
+            
+            $p1[0]+=0;
+            foreach ($posts as $p2){
+            
+            $p2[0]+=0;
+            if($p1==$p2){
+                $badge_id=$p1[0];
+            }
+        }
+        }
+   }                        $is_sent=false;     
+                                if ($badge_id==0) {
+                                    return json_encode("Big Badge could not be found!");
+   }
+
+                            $result=self::send_skill_badge($lang_print,$grade,$badge_id,'Allskills');
+                            $is_sent=$result[0];
+                            $portfolio_user_id = $result[1] ? $result[1] : 0;
+                            global  $wpdb;
+                            $table_name = $wpdb->base_prefix . "badge_portfolio";
+                            $previous=$wpdb->get_var("SELECT badge_id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='Allskills' AND lang='$learn_lang' AND level='$grade'");
+                            if($is_sent){
+                                
+                            if(is_null($previous)){
+                                
+                                 $w3=$wpdb->insert( 
+	$table_name, 
+	array( 
+		'user_id' => $portfolio_user_id, 
+		'badge_id' => $badge_id,
+                'lang' => $learn_lang,
+                'level' => $grade,
+                'skill' => 'Allskills',
+                'answers' => '',
+                'read_lang' => $lang
+	), 
+	array( 
+		'%d', 
+		'%d',
+                '%s',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+	));
+                                if($w3){
+                                    
+                                         return json_encode('BIG Badge SENT and saved!');     
+                                }
+                        else{
+                            
+                              return json_encode('BIG Badge SENT! BUT could not be saved,database insert error');
+                        }
+                            }
+                            else{
+                            
+                                return json_encode('BIG Badge SENT but not saved to database because already exist!');  
+                            }
+                            }
+                            else{
+                                return json_encode('BIG Badge could not be sent problem');
+                            }
+                         }
+                         //****** BIG BADGE SENDING PART
+                     }
+ 
+                }
+                else{}
                 
+    }
+    else{
+         return json_encode('Badge SENT ! But Not saved the database because already exist.');   
+    }
+            if($w)
+            {
+                 return json_encode('Badge is saved and send to email successfuly');     
+            }
+            else
+                {
+                   return json_encode('Not saved something went wrong with wpdb insert');   
+                } 
+         
+  
+    }
+    else{
+        return json_encode('Couldnt send email.');   
+    }
+ 
+            
         }
 
 }

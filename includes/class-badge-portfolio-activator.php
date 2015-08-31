@@ -23,6 +23,7 @@ class BadgePortfolio_Activator {
     $table_name = $wpdb->base_prefix . "portfolio_langs"; 
     //Id	Part2B	Part2T	Part1	Scope	Language_Type	Ref_Name	Comment
     if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
+         $charset_collate = $wpdb->get_charset_collate();
     $sql = "CREATE TABLE $table_name (
     lang_id mediumint(10) NOT NULL AUTO_INCREMENT,
     Id char(3) NOT NULL ,
@@ -60,7 +61,42 @@ class BadgePortfolio_Activator {
     }
     fclose($tabfilename);
     }
-
+    
+      $table_name = $wpdb->base_prefix . "badge_portfolio"; 
+    //
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
+        $charset_collate = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE $table_name (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    user_id bigint(20) NOT NULL,
+    badge_id int(10) NOT NULL,
+    lang char(3) NOT NULL,
+    level varchar(10) NOT NULL,
+    skill varchar(20) NOT NULL,
+    answers varchar(60) NOT NULL,
+    read_lang varchar(10) NOT NULL,
+    UNIQUE KEY id (id)
+    ) $charset_collate;";
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( $sql );
+    }
+    
+    $table_name = $wpdb->base_prefix . "badge_portfolio_user"; 
+    //
+    if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name){
+         $charset_collate = $wpdb->get_charset_collate();
+    $sql = "CREATE TABLE $table_name (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    user_id bigint(20) NOT NULL,
+    lang char(3) NOT NULL,
+    skills char(5) DEFAULT '00000' NOT NULL,
+    UNIQUE KEY id (id)
+    ) $charset_collate;";
+    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+    dbDelta( $sql );
+    }
+    
+    
     }
 
 }

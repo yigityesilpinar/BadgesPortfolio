@@ -63,22 +63,36 @@ return   array_filter($categorized);
                 $lang = @$_POST['lang'];
                 $learn_lang = @$_POST['learn_lang'];
                 $skill = @$_POST['skill'];
-               
-              
-                  
-    
-    $rows=array();
-    $result=array();
-   
-    $ans;
-    $level;
-//    $level= $ans[1];
-//    $ans= $ans[0];
+                $fileurl=str_replace("\\","/", __FILE__);
+                $filename = str_replace("//","//////",$fileurl);
+                $pathparts=explode('/', $filename);
+                $skills = array("Writing","Interaction","Reading","Listening","Speaking"); //
+                for ($index = 0; $index < 6; $index++) {
+                $length=count($pathparts);
+                unset($pathparts[$length-1]);
+                array_values($pathparts);  
+                }
+                $filepath=implode('/', $pathparts).'/wp-load.php';
+                require_once($filepath);   
+                global $user_ID;
+                global $wpdb;
+                $table_name = $wpdb->base_prefix . "badge_portfolio"; 
+                $previous=$wpdb->get_results("SELECT level,answers FROM $table_name WHERE user_id='$user_ID' AND skill='$skills[$skill]' AND lang='$learn_lang' ORDER BY id DESC LIMIT 1",ARRAY_N);
+                if(!is_null($previous)){  
+                $level=$previous[0][0];
+                $ans=$previous[0][1];
+                }
+                else{
+                $ans='';
+                $level='--';
+                }
+            
+
 
 $categorized=self::get_cat_questions($skill,$lang);
 
 
-return json_encode(array($categorized,$skill),JSON_FORCE_OBJECT);
+return json_encode(array($categorized,$skill,$ans,$level),JSON_FORCE_OBJECT);
              
                 
         }

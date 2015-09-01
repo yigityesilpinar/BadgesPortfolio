@@ -34,7 +34,8 @@ class BadgePortfolioMain {
             echo "<option value='$item' $selected>$item</option>";
         }
         echo '</select> </br></br>';       
-    echo '<div id="skills_div"></div>';     
+    echo '<div id="skills_div"></div>';    
+    echo '<div id="previous_skills_div"></div>';
     echo '<div id="skills_questions_div">';    
     echo '<p>Please select which language you want to learn</p></div>';
     echo '</form>';

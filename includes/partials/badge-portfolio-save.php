@@ -221,7 +221,7 @@ $filename = str_replace("//","//////",$fileurl);
         }
    }
    if ($badge_id==0) {
-       return json_encode('Badge could not be found!');
+   return json_encode(array(false,'BIG Badge could not be found!'),JSON_FORCE_OBJECT);     
    }
     $result=self::send_skill_badge($lang_print,$grade,$badge_id,$skills[$skill]);
     $is_sent=$result[0];
@@ -240,7 +240,7 @@ $filename = str_replace("//","//////",$fileurl);
         
         global $wpdb;
         $table_name = $wpdb->base_prefix . "badge_portfolio"; 
-        $previous=$wpdb->get_var("SELECT badge_id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='$skills[$skill]' AND lang='$learn_lang' AND level='$grade'");
+        $previous=$wpdb->get_var("SELECT id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='$skills[$skill]' AND lang='$learn_lang' AND level='$grade'");
         if(is_null($previous)){     
         $w=$wpdb->insert( 
 	$table_name, 
@@ -293,26 +293,24 @@ $filename = str_replace("//","//////",$fileurl);
               $skills_arr=str_split($skills_db);
               $skills_arr[$skill]=$level_index;
               $skills_db=implode('',$skills_arr);
-              $w2=$wpdb->replace( 
+                   $w2=$wpdb->update( 
 	$table_name, 
-	array(  'id' => $old_lang,
-		'user_id' => $portfolio_user_id, 
-                'lang' => $learn_lang,
-                'skills' => $skills_db
-	), 
 	array( 
-                '%d',
-                '%d',
-                '%s',
-                '%s'
-	));
+		'skills' => $skills_db,	// string
+	), 
+	array( 'id' => $old_lang ), 
+	array( 
+		'%s',	
+	), 
+	array( '%d' ) 
+        );
               
              }
                      $skills_arr=str_split($skills_db);
                      foreach ($skills_arr as $value) {
                          $value+=0;
                          if($value==0){
-                         return json_encode('Badge SENT!',$skills_db);    
+                        return json_encode(array(true,'Badge sent!'),JSON_FORCE_OBJECT);         
                              
                          }
                         
@@ -364,7 +362,7 @@ $filename = str_replace("//","//////",$fileurl);
         }
    }                        $is_sent=false;     
                                 if ($badge_id==0) {
-                                    return json_encode("Big Badge could not be found!");
+                              return json_encode(array(false,'BIG Badge could not be found!'),JSON_FORCE_OBJECT);     
    }
 
                             $result=self::send_skill_badge($lang_print,$grade,$badge_id,'Allskills');
@@ -372,10 +370,10 @@ $filename = str_replace("//","//////",$fileurl);
                             $portfolio_user_id = $result[1] ? $result[1] : 0;
                             global  $wpdb;
                             $table_name = $wpdb->base_prefix . "badge_portfolio";
-                            $previous=$wpdb->get_var("SELECT badge_id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='Allskills' AND lang='$learn_lang' AND level='$grade'");
+                            $previous2=$wpdb->get_var("SELECT id FROM $table_name WHERE user_id='$portfolio_user_id' AND skill='Allskills' AND lang='$learn_lang' AND level='$grade'");
                             if($is_sent){
                                 
-                            if(is_null($previous)){
+                            if(is_null($previous2)){
                                 
                                  $w3=$wpdb->insert( 
 	$table_name, 
@@ -398,46 +396,54 @@ $filename = str_replace("//","//////",$fileurl);
                 '%s'
 	));
                                 if($w3){
-                                    
-                                         return json_encode('BIG Badge SENT and saved!');     
+                                     return json_encode(array(true,'BIG Badge SENT and saved!'),JSON_FORCE_OBJECT);     
                                 }
                         else{
-                            
-                              return json_encode('BIG Badge SENT! BUT could not be saved,database insert error');
+                              return json_encode(array(false,'BIG Badge SENT! BUT could not be saved,database insert error'),JSON_FORCE_OBJECT);                          
                         }
                             }
                             else{
-                            
-                                return json_encode('BIG Badge SENT but not saved to database because already exist!');  
+                                return json_encode(array(true,'BIG Badge SENT but not saved to database because already exist!'),JSON_FORCE_OBJECT);
                             }
                             }
                             else{
-                                return json_encode('BIG Badge could not be sent problem');
+                                return json_encode(array(false,'BIG Badge could not be sent problem'),JSON_FORCE_OBJECT);
                             }
                          }
                          //****** BIG BADGE SENDING PART
                      }
  
                 }
-                else{}
+                  return json_encode(array(false,'Couldnt send email.'),JSON_FORCE_OBJECT);   
                 
     }
     else{
-         return json_encode('Badge SENT ! But Not saved the database because already exist.');   
+        $wpdb->update( 
+	$table_name, 
+	array( 
+		'answers' => $answer_string,	// string
+	), 
+	array( 'id' => $previous ), 
+	array( 
+		'%s',	
+	), 
+	array( '%d' ) 
+);
+         return json_encode(array(true,'Badge SENT ! But Not saved the database because already exist.'),JSON_FORCE_OBJECT);
     }
             if($w)
             {
-                 return json_encode('Badge is saved and send to email successfuly');     
+                 return json_encode(array(true,'Badge is saved and send to email successfuly'),JSON_FORCE_OBJECT);   
             }
             else
                 {
-                   return json_encode('Not saved something went wrong with wpdb insert');   
+                      return json_encode(array(false,'Not saved something went wrong with wpdb insert.'),JSON_FORCE_OBJECT);   
                 } 
          
   
     }
     else{
-        return json_encode('Couldnt send email.');   
+        return json_encode(array(false,'Couldnt send email.'),JSON_FORCE_OBJECT);   
     }
  
             

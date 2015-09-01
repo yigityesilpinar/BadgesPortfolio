@@ -13,9 +13,10 @@
 #langsAutocompSkills {
     max-width: 200px;
 }
+
 @media screen and (max-width: 470px) {
     #langsAutocompSkills {
-          display: block;
+        display: block;
     }
 }
 
@@ -25,8 +26,42 @@
     color: #D8000C;
 }
 
-
-#skills_questions_div td.A1{
-    /*EXAMPLE CSS */
+span.save_success {
+    margin-left: 1em;
+    color: limegreen;
 }
 
+#skills_selected_lang_div {
+    font-weight: bold;
+    float: right;
+    margin-bottom: 3%;
+    border: 0.3em dashed #F3F6F9;
+    padding: 1em;
+    font-size: 1.3em;
+}
+
+#skills_delete_record_div {
+    font-weight: bold;
+    float: left;
+    margin-bottom: 3%;
+    border: 0.3em dashed #F3F6F9;
+    padding: 1em;
+    font-size: 1.3em;
+}
+
+#skills_div a {
+    display: inline-block;
+    padding: 1em;
+    border: 0.08em dashed black;
+    margin-right: 0.1em;
+    margin-bottom: 1em;
+}
+
+    #skills_div a.selected {
+        background-color: lightblue;
+        border: 0.08em solid lightblue;
+    }
+
+#skills_questions_div td.A1 {
+    /*EXAMPLE CSS */
+}

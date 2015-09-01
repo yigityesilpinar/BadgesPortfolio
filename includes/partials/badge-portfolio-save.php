@@ -170,7 +170,15 @@ function send_skill_badge($lang,$level,$badge_id,$skill) {
                     $grade=$level;
                 } 
                     
-                }     
+                }
+                if($grade==='--'){                
+                     return json_encode(array(false,'Level is not enough for saving'),JSON_FORCE_OBJECT); 
+                }
+        else{
+        
+             return json_encode(array(false,$grade),JSON_FORCE_OBJECT);  
+        }
+        
 	   $fileurl=str_replace("\\","/", __FILE__);
 $filename = str_replace("//","//////",$fileurl);
      $pathparts=explode('/', $filename);
@@ -322,7 +330,7 @@ $filename = str_replace("//","//////",$fileurl);
                          
                          
                          // BIG BADGE SENDING PART******
-                         if($skills_int >= $temp){
+                         if($skills_int >= $temp && $skills_int%10000 >= $temp%10000 && $skills_int%1000 >= $temp%1000 && $skills_int%100 >= $temp%100 && $skills_int%10 >= $temp%10){
                              
                                global $wpdb;
     $table_name = $wpdb->prefix . "terms"; 

@@ -8,9 +8,10 @@ jQuery(document).ready(function ($) {
     var host = slashes.concat(window.location.hostname);
     var plugin_url = host.concat('/wp-content/plugins/BadgePortfolio/');
     var skills = ["Writing", "Interaction", "Reading", "Listening", "Speaking"];
+    var change = true;
     function displayForm(data1) {
+        change = true;
         $('#previous_skills_div').html('');
-        console.log(data1);
         var skills_div = '';
         skills_data = data1[0];
         var skill = data1[1];
@@ -187,6 +188,11 @@ jQuery(document).ready(function ($) {
 
     $('#badge_portfolio_form').on('submit', function (e) {
         e.preventDefault();
+        if (!change) {
+            console.log('Can not be saved, no change!');
+            return;
+        }
+        change = false;
         $("#portfolio_save_p").find('span').attr('class', '');
         $("#portfolio_save_p").find('span').html('');
         var i = 0;
@@ -226,15 +232,13 @@ jQuery(document).ready(function ($) {
                 'num': numOfQuestions,
                 'levels': levels
             },
-            success: function (data) {
+            success: function (bata) {
+                console.log(typeof bata);
 
-                if (!data) {
-                    console.log('Data came empty, sth went wrong with the save operation.');
-                    return;
-                }
-                var is_valid = data[0];
-                var save_message = data[1];
+                var is_valid = bata[0];
+                var save_message = bata[1];
                 console.log(save_message);
+                return;
                 if (is_valid) {
                     var skill = (parseInt(data) + 1) % 6; // next skill
                     $("#portfolio_save_p").find('span').attr('class', 'save_success');
@@ -294,7 +298,6 @@ jQuery(document).ready(function ($) {
             },
             dataType: 'json',
             success: function (data1) {
-
                 var temp = {};
                 if (data1[0]) {
                     temp[0]=(skills_data);

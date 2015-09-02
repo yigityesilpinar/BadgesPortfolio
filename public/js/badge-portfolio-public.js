@@ -9,6 +9,7 @@ jQuery(document).ready(function ($) {
     var plugin_url = host.concat('/wp-content/plugins/BadgePortfolio/');
     var skills = ["Writing", "Interaction", "Reading", "Listening", "Speaking"];
     var change = true;
+    var valid_learn_lang = true;
     function displayForm(data1) {
         change = true;
         $('#previous_skills_div').html('');
@@ -16,8 +17,8 @@ jQuery(document).ready(function ($) {
         skills_data = data1[0];
         var skill = data1[1];
         var answers = data1[2];
-        if(answers)
-        var ans = answers.split(',');
+        if (answers)
+            var ans = answers.split(',');
         var level = data1[3];
         var learn_lang = $('#langsAutocompSkills').val();
         var result = '';
@@ -99,6 +100,19 @@ jQuery(document).ready(function ($) {
 
     }
 
+    $('#langsAutocompSkills').on('change', function (e) {
+        var value = $(this).val().toString();
+        //Check the value is valid or not after changing learning language (autocomplete)
+
+            valid_learn_lang = false;
+            $(this).val('');
+            $('#skills_div').html('');
+            $('#previous_skills_div').html('');
+            $('#skills_questions_div').html('<p>Please select which language you want to learn</p>');
+            return;
+
+    });
+
     $('#langsAutocompSkills').autocomplete({
         source: plugin_url + 'includes/partials/badge-portfolio-langs.php',
         minLength: 2,
@@ -116,6 +130,7 @@ jQuery(document).ready(function ($) {
                 },
                 dataType: 'json',
                 success: function (data) {
+                    valid_learn_lang = true;
                     displayForm(data);
                 }
             });
@@ -192,9 +207,16 @@ jQuery(document).ready(function ($) {
             console.log('Can not be saved, no change!');
             return;
         }
+        valid_learn_lang
+        if (!valid_learn_lang) {
+            console.log('Can not be saved, language is not valid!');
+            return;
+        }
         change = false;
         $("#portfolio_save_p").find('span').attr('class', '');
         $("#portfolio_save_p").find('span').html('');
+        $("#portfolio_save_p").find('a').remove();
+        
         var i = 0;
         var answers = [];  // empty array
         var question_count = 0;
@@ -232,13 +254,14 @@ jQuery(document).ready(function ($) {
                 'num': numOfQuestions,
                 'levels': levels
             },
-            success: function (bata) {
-                console.log(typeof bata);
+            dataType: 'json',
+            success: function (data) {
+                $("#portfolio_save_p").find('span').attr('class', '');
+                $("#portfolio_save_p").find('span').html('');
+                var is_valid = data[0];
+                var save_message = data[1];
 
-                var is_valid = bata[0];
-                var save_message = bata[1];
                 console.log(save_message);
-                return;
                 if (is_valid) {
                     var skill = (parseInt(data) + 1) % 6; // next skill
                     $("#portfolio_save_p").find('span').attr('class', 'save_success');
@@ -246,6 +269,11 @@ jQuery(document).ready(function ($) {
                     $("#portfolio_save_p").append('<a id="show_next_skill_a" href="_">Next</a>');
                 }
                 else {
+                    if (save_message.indexOf("Level") === 0) {
+                        var save_error = 'Please answer enough questions to be graded';
+                        $("#portfolio_save_p").find('span').attr('class', 'save_error');
+                        $("#portfolio_save_p").find('span').html(save_error);
+                    }
                     return;
                 }
 
@@ -253,6 +281,7 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+
     $('#skills_questions_div').on('click', 'a#show_next_skill_a', function (e) {
         e.preventDefault();
         var skill = (parseInt($('#skills_div').find('a.selected').attr('href')) + 1) % 5;
@@ -300,19 +329,23 @@ jQuery(document).ready(function ($) {
             success: function (data1) {
                 var temp = {};
                 if (data1[0]) {
-                    temp[0]=(skills_data);
-                    temp[1]=(data1[1]);
+                    temp[0] = (skills_data);
+                    temp[1] = (data1[1]);
                     temp[2] = (data1[2]);
                     temp[3] = (data1[3]);
-                    displayForm(temp);
-                    //window.scrollTo(0, 0);
+                    displayForm(temp);   
                 }
                 else {
                     alert('mistake');
+                    location.reload();
                 }
 
             }
         });
+    });
+
+    $('#skills_questions_div').on('change', 'input:radio', function (e) {
+        change = true;
     });
 
 });

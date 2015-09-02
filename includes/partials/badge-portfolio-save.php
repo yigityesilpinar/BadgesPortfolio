@@ -174,10 +174,7 @@ function send_skill_badge($lang,$level,$badge_id,$skill) {
                 if($grade==='--'){                
                      return json_encode(array(false,'Level is not enough for saving'),JSON_FORCE_OBJECT); 
                 }
-        else{
-        
-             return json_encode(array(false,$grade),JSON_FORCE_OBJECT);  
-        }
+       
         
 	   $fileurl=str_replace("\\","/", __FILE__);
 $filename = str_replace("//","//////",$fileurl);
@@ -229,7 +226,7 @@ $filename = str_replace("//","//////",$fileurl);
         }
    }
    if ($badge_id==0) {
-   return json_encode(array(false,'BIG Badge could not be found!'),JSON_FORCE_OBJECT);     
+   return json_encode(array(false,'Badge could not be found!'),JSON_FORCE_OBJECT);     
    }
     $result=self::send_skill_badge($lang_print,$grade,$badge_id,$skills[$skill]);
     $is_sent=$result[0];
